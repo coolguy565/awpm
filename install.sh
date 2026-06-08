@@ -3,11 +3,23 @@ set -e
 
 URL="https://raw.githubusercontent.com/coolguy565/awpm/main/awpm"
 INSTALL_DIR="$HOME/.local/bin"
+BINARY_PATH="$INSTALL_DIR/awpm"
 
 echo "================================"
 echo " AWPM Installer"
 echo "================================"
 echo ""
+
+mkdir -p "$INSTALL_DIR"
+
+# -------------------------
+# Reinstall check
+# -------------------------
+if [ -f "$BINARY_PATH" ]; then
+    echo "AWPM is already installed."
+    echo "Reinstalling latest version..."
+    echo ""
+fi
 
 DOWNLOADER="auto"
 
@@ -39,7 +51,7 @@ case "$DOWNLOADER" in
 esac
 
 # -------------------------
-# Auto-detect
+# Auto detect downloader
 # -------------------------
 if [ "$DOWNLOADER" = "auto" ]; then
     if command -v curl >/dev/null 2>&1; then
@@ -48,7 +60,6 @@ if [ "$DOWNLOADER" = "auto" ]; then
         DOWNLOADER="wget"
     else
         echo "Error: neither curl nor wget is installed."
-        echo "Install one of them and retry."
         exit 1
     fi
 fi
@@ -56,7 +67,6 @@ fi
 echo "Using downloader: $DOWNLOADER"
 echo ""
 
-mkdir -p "$INSTALL_DIR"
 TMPFILE="$INSTALL_DIR/awpm.tmp"
 
 # -------------------------
@@ -69,14 +79,14 @@ else
 fi
 
 # -------------------------
-# Install
+# Install (overwrite)
 # -------------------------
 chmod +x "$TMPFILE"
-mv "$TMPFILE" "$INSTALL_DIR/awpm"
+mv -f "$TMPFILE" "$BINARY_PATH"
 
 echo ""
 echo "Installed AWPM to:"
-echo "  $INSTALL_DIR/awpm"
+echo "  $BINARY_PATH"
 echo ""
 
 # -------------------------
