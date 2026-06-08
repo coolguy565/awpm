@@ -1,6 +1,7 @@
 package main
 
 import (
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -32,6 +33,32 @@ type Dependencies struct {
 	System []string   `json:"system"`
 	AnyOf  [][]string `json:"any_of"`
 }
+
+// ---------------- ENV ----------------
+
+func insecureEnabled() bool {
+	return strings.ToLower(os.Getenv("AWPM_INSECURE_FETCH")) == "true"
+}
+
+// ---------------- HTTP CLIENT (FIXED TLS) ----------------
+
+func httpClient() *http.Client {
+	if insecureEnabled() {
+		fmt.Println("WARNING: AWPM_INSECURE_FETCH=true (TLS verification disabled)")
+	}
+
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{
+			InsecureSkipVerify: insecureEnabled(),
+		},
+	}
+
+	return &http.Client{
+		Transport: tr,
+	}
+}
+
+// ---------------- MAIN ----------------
 
 func main() {
 	if len(os.Args) < 2 {
@@ -87,22 +114,6 @@ func main() {
 	}
 }
 
-// ---------------- ENV ----------------
-
-func insecureEnabled() bool {
-	return strings.ToLower(os.Getenv("AWPM_INSECURE_FETCH")) == "true"
-}
-
-// ---------------- HTTP CLIENT ----------------
-
-func httpClient() *http.Client {
-	if insecureEnabled() {
-		fmt.Println("WARNING: AWPM_INSECURE_FETCH=true (insecure mode enabled)")
-	}
-
-	return &http.Client{}
-}
-
 // ---------------- REGISTRY ----------------
 
 func loadRegistry() (*Registry, error) {
@@ -150,8 +161,7 @@ func install(name string, noconfirm bool) error {
 	}
 
 	if pkg.Tier == 3 {
-		fmt.Println("\nWARNING: Tier 3 package")
-		fmt.Println("This executes a remote script.")
+		fmt.Println("\nWARNING: Tier 3 package (remote script execution)")
 	}
 
 	if !noconfirm {
