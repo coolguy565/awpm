@@ -10,7 +10,7 @@ mkdir -p "$INSTALL_DIR"
 
 # download latest linux build (you will replace this URL later with releases)
 curl -L -o "$INSTALL_DIR/awpm" \
-"https://your-domain-or-github-releases/awpm-linux-amd64"
+"https://raw.githubusercontent.com/coolguy565/awpm/main/awpm"
 
 chmod +x "$INSTALL_DIR/awpm"
 
