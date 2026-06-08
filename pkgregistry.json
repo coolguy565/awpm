@@ -1,0 +1,14 @@
+{
+  "version": "1.0",
+  "packages": {
+    "opencode": {
+      "latest": "1.0.0",
+      "description": "OpenCode CLI tool",
+      "script": "https://raw.githubusercontent.com/anomalyco/opencode/refs/heads/dev/install",
+      "sha256": null,
+      "tier": 3,
+      "allow_unverified": true,
+      "update_channel": "latest"
+    }
+  }
+}
