@@ -1,27 +1,61 @@
 #!/bin/sh
 set -e
 
-APP="awpm"
-INSTALL_DIR="$HOME/.local/bin"
+URL="https://raw.githubusercontent.com/coolguy565/awpm/main/awpm"
 
-echo "Installing AWPM (Awesome Package Manager)..."
+echo "AWPM installer"
 
-mkdir -p "$INSTALL_DIR"
+# choose downloader
+DOWNLOADER=""
 
-# download latest linux build (you will replace this URL later with releases)
-curl -L -o "$INSTALL_DIR/awpm" \
-"https://raw.githubusercontent.com/coolguy565/awpm/main/awpm"
-
-chmod +x "$INSTALL_DIR/awpm"
-
-echo "Installed to $INSTALL_DIR/awpm"
-
-# PATH hint
-if ! echo "$PATH" | grep -q "$INSTALL_DIR"; then
-    echo ""
-    echo "WARNING: $INSTALL_DIR is not in PATH"
-    echo "Add this to your shell config:"
-    echo "export PATH=\$HOME/.local/bin:\$PATH"
+if command -v curl >/dev/null 2>&1; then
+    HAS_CURL=1
+else
+    HAS_CURL=0
 fi
 
-echo "Done."
+if command -v wget >/dev/null 2>&1; then
+    HAS_WGET=1
+else
+    HAS_WGET=0
+fi
+
+if [ "$HAS_CURL" -eq 1 ] && [ "$HAS_WGET" -eq 1 ]; then
+    echo "Both curl and wget are available."
+    echo "Choose download method:"
+    echo "  1) curl"
+    echo "  2) wget (no-check-certificate)"
+    printf "> "
+    read choice
+
+    if [ "$choice" = "2" ]; then
+        DOWNLOADER="wget"
+    else
+        DOWNLOADER="curl"
+    fi
+
+elif [ "$HAS_CURL" -eq 1 ]; then
+    DOWNLOADER="curl"
+elif [ "$HAS_WGET" -eq 1 ]; then
+    DOWNLOADER="wget"
+else
+    echo "Error: neither curl nor wget found"
+    exit 1
+fi
+
+echo "Using: $DOWNLOADER"
+
+mkdir -p "$HOME/.local/bin"
+
+if [ "$DOWNLOADER" = "curl" ]; then
+    curl -L -o awpm "$URL"
+else
+    wget --no-check-certificate -q -L -O awpm "$URL"
+fi
+
+chmod +x awpm
+mv awpm "$HOME/.local/bin/"
+
+echo "Installed AWPM to ~/.local/bin/awpm"
+
+echo "Make sure ~/.local/bin is in your PATH"
